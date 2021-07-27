@@ -15,6 +15,7 @@ function App() {
 		name: '',
 		email: '',
 		password: '',
+		errors: '',
 		photo: '',
 	});
 
@@ -56,17 +57,43 @@ function App() {
 			})
 	}
 
-	console.log(user);
+	// console.log(user);
 
-	const handleSubmit = () => {
-		console.log('Form Submitted')
+	const handleSubmit = (e) => {
+		console.log(user.name, user.email, user.password);
+		if (user.email && user.password) {
+			console.log("submitting");
+
+			firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
+				.then((userCredential) => {
+					// Signed in 
+					const user = userCredential.user;
+					// ...
+					console.log(user)
+					const newUserInfo = { ...user };
+					newUserInfo.errors = '';
+					setUser(newUserInfo)
+				})
+				.catch((error) => {
+					const errorCode = error.code;
+					const errorMessage = error.message;
+
+					const newUserInfo = {...user};
+					newUserInfo.errors = error.message;
+					setUser(newUserInfo);
+
+					// ..
+					console.log(errorCode, errorMessage);
+				});
+		}
+		e.preventDefault();
 	}
 
 	const handleBlur = (event) => {
-		debugger;
-		let isFormValid = true;
+		// debugger;
+		let isFieldValid = true;
 		if (event.target.name === 'email') {
-			isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
+			isFieldValid = /\S+@\S+\.\S+/.test(event.target.value);
 		}
 
 
@@ -74,22 +101,22 @@ function App() {
 			const isPassLValid = (event.target.value).length > 3;
 			const isPassHasNum = /[0-9]/g.test(event.target.value);
 			const ispassValid = isPassHasNum && isPassLValid;
-			isFormValid = ispassValid;
+			isFieldValid = ispassValid;
 		}
-		console.log(isFormValid)
+		console.log(isFieldValid)
 
-		if (isFormValid) {
-			const newUserInfo = {...user};
+		if (isFieldValid) {
+			const newUserInfo = { ...user };
 			newUserInfo[event.target.name] = event.target.value;
 			setUser(newUserInfo);
 		}
-		console.log(event.key)
+		// console.log(event.key)
 	}
-	
-	console.log(user.name)
-	console.log('pass', user.password)
-	
-debugger;
+
+	// console.log(user.name)
+	// console.log('pass', user.password)
+
+	// debugger;
 
 	return (
 		<div className="App">
@@ -97,6 +124,11 @@ debugger;
 			{user.isSignedIn ?
 				<button onClick={handleSignOut}>Sign Out</button> :
 				<button onClick={handleSignin}>Sign In</button>
+			}
+			{
+				user.errors ? 
+				<h1>{user.errors}</h1>:
+				<></>
 			}
 
 			{
@@ -109,9 +141,6 @@ debugger;
 
 			<div>
 				<h1>Hardcoded Authentication System</h1>
-				<p>Name: {user.name}</p>
-				<p>Email: {user.email}</p>
-				<p>password: {user.password}</p>
 
 				<form onSubmit={handleSubmit}>
 					<input type="name" name="name" onBlur={handleBlur} placeholder="Enter Name" /> <br />
@@ -122,7 +151,7 @@ debugger;
 				</form>
 			</div>
 		</div>
-		
+
 	);
 }
 
