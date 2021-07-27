@@ -26,8 +26,8 @@ function App() {
 				const signedInUser = {
 					isSignedIn: true,
 					name: displayName,
-					email: email,
 					photo: photoURL,
+					email: email,
 				}
 				setUser(signedInUser);
 			})
@@ -39,29 +39,56 @@ function App() {
 
 	const handleSignOut = () => {
 		firebase.auth().signOut()
-		.then((res) => {
-			console.log(res);
-			const signedOutUser = {
-				isSignedIn: false,
-				name: '',
-				email: '',
-				photo: '',
-			}
-			setUser(signedOutUser);
-		})
+			.then((res) => {
+				console.log(res);
+				const signedOutUser = {
+					isSignedIn: false,
+					name: '',
+					email: '',
+					password: '',
+					photo: '',
+				}
+				setUser(signedOutUser);
+			})
 
-		.catch(error => {
-			console.log(error);
-		})
+			.catch(error => {
+				console.log(error);
+			})
 	}
 
 	console.log(user);
 
+	const handleSubmit = () => {
+		console.log('Form Submitted')
+	}
+
+	const handleBlur = (event) => {
+
+		let isFormValid = true;
+		if (event.target.type === 'email') {
+			isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
+		}
+
+
+		if (event.target.type === 'password') {
+			const isPassLValid = (event.target.value).length > 3;
+			const isPassHasNum = /[0-9]/g.test(event.target.value);
+			const ispassValid = isPassHasNum && isPassLValid;
+			isFormValid = ispassValid;
+		}
+
+		if (isFormValid) {
+
+		}
+	}
+	
+
+
 	return (
 		<div className="App">
-			
-			{	user.isSignedIn ?	
-				<button onClick={handleSignOut}>Sign Out</button>:
+
+			{user.isSignedIn ?
+				<button onClick={handleSignOut}>Sign Out</button> :
 				<button onClick={handleSignin}>Sign In</button>
 			}
 
@@ -72,6 +99,16 @@ function App() {
 					<h1>Welcome {user.name}</h1>
 				</div>
 			}
+			<div>
+				<h1>Hardcoded Authentication System</h1>
+
+				<form onSubmit={handleSubmit}>
+					<input type="email" onBlur={handleBlur} placeholder="Enter Email" required /><br />
+					<input type="password" onBlur={handleBlur} name="" placeholder="Enter Password" required />
+					<br />
+					<input type="submit" value="Submit" />
+				</form>
+			</div>
 		</div>
 	);
 }
