@@ -14,6 +14,7 @@ function App() {
 		isSignedIn: false,
 		name: '',
 		email: '',
+		password: '',
 		photo: '',
 	});
 
@@ -45,7 +46,6 @@ function App() {
 					isSignedIn: false,
 					name: '',
 					email: '',
-					password: '',
 					photo: '',
 				}
 				setUser(signedOutUser);
@@ -63,26 +63,33 @@ function App() {
 	}
 
 	const handleBlur = (event) => {
-
+		debugger;
 		let isFormValid = true;
-		if (event.target.type === 'email') {
+		if (event.target.name === 'email') {
 			isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
 		}
 
 
-		if (event.target.type === 'password') {
+		if (event.target.name === 'password') {
 			const isPassLValid = (event.target.value).length > 3;
 			const isPassHasNum = /[0-9]/g.test(event.target.value);
 			const ispassValid = isPassHasNum && isPassLValid;
 			isFormValid = ispassValid;
 		}
+		console.log(isFormValid)
 
 		if (isFormValid) {
-
+			const newUserInfo = {...user};
+			newUserInfo[event.target.name] = event.target.value;
+			setUser(newUserInfo);
 		}
+		console.log(event.key)
 	}
 	
-
+	console.log(user.name)
+	console.log('pass', user.password)
+	
+debugger;
 
 	return (
 		<div className="App">
@@ -99,17 +106,23 @@ function App() {
 					<h1>Welcome {user.name}</h1>
 				</div>
 			}
+
 			<div>
 				<h1>Hardcoded Authentication System</h1>
+				<p>Name: {user.name}</p>
+				<p>Email: {user.email}</p>
+				<p>password: {user.password}</p>
 
 				<form onSubmit={handleSubmit}>
-					<input type="email" onBlur={handleBlur} placeholder="Enter Email" required /><br />
-					<input type="password" onBlur={handleBlur} name="" placeholder="Enter Password" required />
+					<input type="name" name="name" onBlur={handleBlur} placeholder="Enter Name" /> <br />
+					<input type="email" name="email" onBlur={handleBlur} placeholder="Enter Email" required /><br />
+					<input type="password" name="password" onBlur={handleBlur} placeholder="Enter Password" required />
 					<br />
-					<input type="submit" value="Submit" />
+					<input id='submit-btn' type="submit" value="Submit" />
 				</form>
 			</div>
 		</div>
+		
 	);
 }
 
