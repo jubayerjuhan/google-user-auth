@@ -16,8 +16,12 @@ function App() {
 		email: '',
 		password: '',
 		errors: '',
+		success: false,
 		photo: '',
+		loginSuccess: false,
 	});
+
+	const [newUser, setNewUser] = useState(false)
 
 	const handleSignin = () => {
 		console.log('sign in clicked yey');
@@ -61,7 +65,7 @@ function App() {
 
 	const handleSubmit = (e) => {
 		console.log(user.name, user.email, user.password);
-		if (user.email && user.password) {
+		if (newUser && user.email && user.password) {
 			console.log("submitting");
 
 			firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
@@ -72,18 +76,48 @@ function App() {
 					console.log(user)
 					const newUserInfo = { ...user };
 					newUserInfo.errors = '';
+					newUserInfo.success = true;
 					setUser(newUserInfo)
 				})
 				.catch((error) => {
 					const errorCode = error.code;
 					const errorMessage = error.message;
 
-					const newUserInfo = {...user};
+					const newUserInfo = { ...user };
 					newUserInfo.errors = error.message;
+					newUserInfo.success = false;
 					setUser(newUserInfo);
 
 					// ..
 					console.log(errorCode, errorMessage);
+				});
+		}
+
+		if (!newUser && user.email && user.password) {
+			console.log('Logging In...');
+
+			firebase.auth().signInWithEmailAndPassword(user.email, user.password)
+				.then((userCredential) => {
+					// Signed in
+					const user = userCredential.user;
+
+					const userInfo = {...user}
+					userInfo.loginSuccess = true;
+					setUser(userInfo);
+					console.log(user);
+					// ...
+				})
+				.catch((error) => {
+					const errorCode = error.code;
+					console.log(errorCode);
+					const errorMessage = error.message;
+
+					const userInfo = {...user};
+					userInfo.errors = error.message;
+					userInfo.loginSuccess = false;
+					setUser(userInfo);
+					console.log(errorMessage);
+
 				});
 		}
 		e.preventDefault();
@@ -113,23 +147,14 @@ function App() {
 		// console.log(event.key)
 	}
 
-	// console.log(user.name)
-	// console.log('pass', user.password)
-
-	// debugger;
-
 	return (
 		<div className="App">
 
 			{user.isSignedIn ?
-				<button onClick={handleSignOut}>Sign Out</button> :
-				<button onClick={handleSignin}>Sign In</button>
+				<button onClick={handleSignOut}>Sign Out With Google</button> :
+				<button onClick={handleSignin}>Sign In With Google</button>
 			}
-			{
-				user.errors ? 
-				<h1>{user.errors}</h1>:
-				<></>
-			}
+
 
 			{
 				user.isSignedIn &&
@@ -142,13 +167,31 @@ function App() {
 			<div>
 				<h1>Hardcoded Authentication System</h1>
 
+				<input type="checkbox" name="newUser" onChange={() => setNewUser(!newUser)} />
+				<label htmlFor="newUser">New Use Sign Up</label>	{console.log(newUser)}
+
 				<form onSubmit={handleSubmit}>
-					<input type="name" name="name" onBlur={handleBlur} placeholder="Enter Name" /> <br />
+					{newUser &&
+						<>
+							<input type="name" name="name" onBlur={handleBlur} placeholder="Enter Name" /> <br />
+						</>
+					}
 					<input type="email" name="email" onBlur={handleBlur} placeholder="Enter Email" required /><br />
 					<input type="password" name="password" onBlur={handleBlur} placeholder="Enter Password" required />
 					<br />
+					<p><small>Pass Rules: Greater Than 6 char and must have 1 num</small></p>
 					<input id='submit-btn' type="submit" value="Submit" />
 				</form>
+
+				<p style={{ color: 'red' }}>{user.errors}</p>
+				{
+					user.success &&
+					<p style={{ color: 'green' }}>User Created Successfully</p>
+				}
+				{
+					user.loginSuccess &&
+					<p style={{ color: 'green'}}>Logged In Successfully</p>
+				}
 			</div>
 		</div>
 
