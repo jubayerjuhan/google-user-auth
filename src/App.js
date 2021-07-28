@@ -69,15 +69,15 @@ function App() {
 			console.log("submitting");
 
 			firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
-				.then((userCredential) => {
+				.then((res) => {
 					// Signed in 
-					const user = userCredential.user;
 					// ...
-					console.log(user)
+					console.log(res.user)
 					const newUserInfo = { ...user };
 					newUserInfo.errors = '';
 					newUserInfo.success = true;
-					setUser(newUserInfo)
+					updateUserInfo(user.name)
+					setUser(newUserInfo);
 				})
 				.catch((error) => {
 					const errorCode = error.code;
@@ -101,7 +101,7 @@ function App() {
 					// Signed in
 					const user = userCredential.user;
 
-					const userInfo = {...user}
+					const userInfo = { ...user }
 					userInfo.loginSuccess = true;
 					setUser(userInfo);
 					console.log(user);
@@ -112,7 +112,7 @@ function App() {
 					console.log(errorCode);
 					const errorMessage = error.message;
 
-					const userInfo = {...user};
+					const userInfo = { ...user };
 					userInfo.errors = error.message;
 					userInfo.loginSuccess = false;
 					setUser(userInfo);
@@ -124,7 +124,6 @@ function App() {
 	}
 
 	const handleBlur = (event) => {
-		// debugger;
 		let isFieldValid = true;
 		if (event.target.name === 'email') {
 			isFieldValid = /\S+@\S+\.\S+/.test(event.target.value);
@@ -147,6 +146,21 @@ function App() {
 		// console.log(event.key)
 	}
 
+	const updateUserInfo = name => {
+		const user = firebase.auth().currentUser;
+
+		user.updateProfile({
+			displayName: name,
+		}).then(() => {
+			// Update successful
+			console.log('username updated successful')
+			// ...
+		}).catch((error) => {
+			// An error occurred
+			console.log(error)
+			// ...
+		});
+	}
 	return (
 		<div className="App">
 
@@ -190,7 +204,7 @@ function App() {
 				}
 				{
 					user.loginSuccess &&
-					<p style={{ color: 'green'}}>Logged In Successfully</p>
+					<p style={{ color: 'green' }}>Logged In Successfully</p>
 				}
 			</div>
 		</div>
